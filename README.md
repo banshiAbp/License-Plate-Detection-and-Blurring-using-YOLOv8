@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/project_banner.jpg" width="100%" alt="License plate detection and privacy blurring project banner">
+</p>
+
 # License Plate Detection & Privacy Blurring using YOLOv8
 
 An end-to-end computer vision pipeline that detects vehicle license plates using
@@ -6,15 +10,27 @@ YOLOv8s and automatically applies Gaussian blur to preserve privacy.
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![YOLOv8](https://img.shields.io/badge/YOLOv8-Ultralytics-111F68)](https://docs.ultralytics.com/)
 [![OpenCV](https://img.shields.io/badge/OpenCV-Privacy%20Blurring-5C3EE8?logo=opencv&logoColor=white)](https://opencv.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-F5C518.svg)](LICENSE)
+[![Last Commit](https://img.shields.io/github/last-commit/banshiAbp/License-Plate-Detection-and-Blurring-using-YOLOv8)](https://github.com/banshiAbp/License-Plate-Detection-and-Blurring-using-YOLOv8/commits/main)
+[![GitHub Stars](https://img.shields.io/github/stars/banshiAbp/License-Plate-Detection-and-Blurring-using-YOLOv8?style=social)](https://github.com/banshiAbp/License-Plate-Detection-and-Blurring-using-YOLOv8/stargazers)
 [![Report](https://img.shields.io/badge/Case%20Study-PDF-B91C1C)](license_plate_detection_case_study.pdf)
 
+## Why This Project?
+
+Vehicle license plates can expose personally identifiable vehicle information.
+This project demonstrates how computer vision can automatically detect and
+obscure plates for privacy-aware traffic monitoring, smart-city systems, and
+public-dataset anonymization.
+
+## Animated Demo
+
 <p align="center">
-  <img src="docs/assets/workflow_demo.png" width="100%" alt="Synthetic original, YOLO detection, and privacy blur workflow">
+  <img src="docs/assets/privacy_demo.gif" width="78%" alt="Animated synthetic license plate detection and privacy blurring workflow">
 </p>
 <p align="center">
   <strong>Original Image &nbsp;&rarr;&nbsp; YOLO Detection &nbsp;&rarr;&nbsp; Privacy Blur</strong>
 </p>
-<p align="center"><em>Privacy-safe synthetic workflow illustration; no real plate is exposed.</em></p>
+<p align="center"><em>Privacy-safe synthetic demonstration; no real plate is exposed.</em></p>
 
 ## Project Highlights
 
@@ -33,12 +49,24 @@ YOLOv8s and automatically applies Gaussian blur to preserve privacy.
 flowchart LR
     A[YOLO Dataset] --> B[Annotation Audit]
     B --> C[Leakage Check]
-    C --> D[Preprocessing]
-    D --> E[YOLOv8s Training]
-    E --> F[Test Evaluation]
-    F --> G[Inference]
-    G --> H[Gaussian Privacy Blur]
-    H --> I[Protected Output]
+    C --> D[EDA]
+    D --> E[Preprocessing]
+    E --> F[YOLOv8s Training]
+    F --> G[Test Evaluation]
+    G --> H[Inference]
+    H --> I[Gaussian Privacy Blur]
+    I --> J[Protected Output]
+```
+
+## Inference Architecture
+
+```mermaid
+flowchart LR
+    A[Input Image] --> B[YOLOv8s Model]
+    B --> C[Plate Bounding Box]
+    C --> D[Expand ROI by 15%]
+    D --> E[Gaussian Blur]
+    E --> F[Privacy-Protected Output]
 ```
 
 ## Results
@@ -47,8 +75,9 @@ flowchart LR
 |---|---:|
 | Precision | **0.916** |
 | Recall | **0.861** |
-| mAP50 | **0.912** |
-| mAP50-95 | **0.670** |
+| mAP@50 | **0.912** |
+| mAP@50-95 | **0.670** |
+| Plates protected at 95% coverage | **445 / 512** |
 | Plate privacy protection at 95% coverage | **86.91%** |
 | Image-level privacy pass rate | **85.75%** |
 | CPU throughput | **1.73 FPS** |
@@ -187,12 +216,37 @@ The complete rendered report is available here:
 - Failure cases and image-level pass rates reveal risks hidden by aggregate metrics.
 - Moderate over-blurring is safer than leaving readable plate characters exposed.
 
+## Challenges Faced
+
+- Detecting plates that occupy only a small portion of high-resolution images
+- Identifying missing, malformed, or mismatched image-label pairs
+- Auditing exact and near-duplicate images across dataset splits
+- Balancing inference speed with the recall needed for privacy protection
+- Working within limited training runtime and compute resources
+- Designing a coverage-based privacy metric beyond standard detection scores
+
+## Future Improvements
+
+- Export the model to ONNX Runtime for portable CPU deployment
+- Add TensorRT optimization for higher-throughput GPU inference
+- Support real-time video streams with ByteTrack or DeepSORT tracking
+- Package inference behind a FastAPI service and Docker image
+- Evaluate across additional cameras, lighting conditions, and countries
+- Add carefully governed OCR only where legally justified and privacy-safe
+
 ## Limitations and Responsible Use
 
 The model provides an automated privacy layer, not a strict privacy guarantee.
 It should be monitored for missed, small, angled, low-light, and motion-blurred
 plates. Production use should prioritize recall, validate performance on the
 target camera domain, and include a review path for high-risk imagery.
+
+## License
+
+The original code in this repository is available under the [MIT License](LICENSE).
+Datasets, pretrained model components, and third-party assets remain subject to
+their respective licenses and terms. The training dataset and trained checkpoint
+are not distributed in this repository.
 
 ## Suggested GitHub Topics
 
