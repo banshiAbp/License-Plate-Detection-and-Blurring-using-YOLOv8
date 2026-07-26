@@ -1,71 +1,200 @@
-# License Plate Detection and Blurring using YOLOv8
+# License Plate Detection & Privacy Blurring using YOLOv8
 
-This project detects vehicle license plates with YOLOv8 and blurs only the detected plate region to protect sensitive personal information in traffic or surveillance images.
+An end-to-end computer vision pipeline that detects vehicle license plates using
+YOLOv8s and automatically applies Gaussian blur to preserve privacy.
 
-## Submission Workflow
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![YOLOv8](https://img.shields.io/badge/YOLOv8-Ultralytics-111F68)](https://docs.ultralytics.com/)
+[![OpenCV](https://img.shields.io/badge/OpenCV-Privacy%20Blurring-5C3EE8?logo=opencv&logoColor=white)](https://opencv.org/)
+[![Report](https://img.shields.io/badge/Case%20Study-PDF-B91C1C)](license_plate_detection_case_study.pdf)
 
-The main working notebook is:
+<p align="center">
+  <img src="docs/assets/workflow_demo.png" width="100%" alt="Synthetic original, YOLO detection, and privacy blur workflow">
+</p>
+<p align="center">
+  <strong>Original Image &nbsp;&rarr;&nbsp; YOLO Detection &nbsp;&rarr;&nbsp; Privacy Blur</strong>
+</p>
+<p align="center"><em>Privacy-safe synthetic workflow illustration; no real plate is exposed.</em></p>
+
+## Project Highlights
+
+- **Dataset quality audit** across 25,158 images and YOLO annotations
+- **Annotation validation** through image-label pairing and bounding-box overlays
+- **Data leakage detection** using MD5 and perceptual hashes
+- **YOLOv8s training** at `imgsz=960` for small, detail-sensitive plates
+- **Untouched test-set evaluation** on 386 images and 512 plate instances
+- **Privacy protection metrics** based on ground-truth plate coverage
+- **CPU inference benchmark** for deployment planning
+- **Failure-case analysis** covering misses, partial coverage, and false positives
+
+## Architecture
+
+```mermaid
+flowchart LR
+    A[YOLO Dataset] --> B[Annotation Audit]
+    B --> C[Leakage Check]
+    C --> D[Preprocessing]
+    D --> E[YOLOv8s Training]
+    E --> F[Test Evaluation]
+    F --> G[Inference]
+    G --> H[Gaussian Privacy Blur]
+    H --> I[Protected Output]
+```
+
+## Results
+
+| Metric | Result |
+|---|---:|
+| Precision | **0.916** |
+| Recall | **0.861** |
+| mAP50 | **0.912** |
+| mAP50-95 | **0.670** |
+| Plate privacy protection at 95% coverage | **86.91%** |
+| Image-level privacy pass rate | **85.75%** |
+| CPU throughput | **1.73 FPS** |
+
+The privacy metric is intentionally stricter than standard object-detection IoU:
+a plate counts as protected only when the blurred prediction covers at least 95%
+of its ground-truth area.
+
+## Quick Start
+
+### 1. Clone and install
+
+```bash
+git clone https://github.com/banshiAbp/License-Plate-Detection-and-Blurring-using-YOLOv8.git
+cd License-Plate-Detection-and-Blurring-using-YOLOv8
+
+python -m venv .venv
+```
+
+Activate the environment:
+
+```bash
+# Windows PowerShell
+.\.venv\Scripts\Activate.ps1
+
+# macOS/Linux
+source .venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Add trained weights
+
+Model weights are intentionally not published in the repository. Copy a trained
+YOLOv8 checkpoint to:
+
+```text
+weights/best.pt
+```
+
+Alternatively, pass a local checkpoint with `--weights`.
+
+### 3. Run privacy blurring
+
+```bash
+python predict.py --source path/to/image.jpg
+```
+
+For a directory:
+
+```bash
+python predict.py --source path/to/images --device cpu
+```
+
+Detected and blurred images are written to `demo_outputs/`.
+
+## De-identified Sample Output
+
+The following real test output is safe to share because detected plate regions
+have already been blurred.
+
+<p align="center">
+  <img src="docs/assets/sample_blurred.jpg" width="72%" alt="De-identified privacy-blurred model output">
+</p>
+
+## Failure-Case Review
+
+The project reports difficult cases rather than showing only successful examples.
+Remaining risks include completely missed plates, partial plate coverage, angled or
+distant plates, multiple-vehicle scenes, and occasional false-positive blur regions.
+
+Detailed failure examples and privacy limitations are documented in the
+[case-study report](license_plate_detection_case_study.pdf). Raw plate imagery is
+not duplicated in the public README.
+
+## Technologies
+
+- Python
+- Ultralytics YOLOv8
+- OpenCV
+- PyTorch
+- NumPy
+- Pandas
+- Matplotlib
+- Jupyter Notebook
+
+## Repository Structure
+
+```text
+.
+|-- docs/assets/                          # README visuals
+|-- weights/best.pt                       # Local trained model (ignored by Git)
+|-- predict.py                            # Simple image/directory inference
+|-- license_plate_detection_case_study.ipynb
+|-- license_plate_detection_case_study.pdf
+|-- data.yaml                             # Training configuration
+|-- data_eval.yaml                        # Evaluation configuration
+|-- splits/                               # Reproducible split manifests
+|-- step_01_annotation_audit.py
+|-- step_02_local_model_outputs.py
+|-- step_03_privacy_blur_metrics.py
+|-- step_04_inference_benchmark.py
+|-- step_05_dataset_leakage_check.py
+|-- step_06_padding_experiment.py
+`-- requirements.txt
+```
+
+The full image dataset, labels, training runs, and generated output directories are
+excluded from Git because they are large reproducible artifacts.
+
+## Reproduce the Analysis
+
+Open and run:
 
 ```text
 license_plate_detection_case_study.ipynb
 ```
 
-The final submission should be exported from the completed notebook as a PDF under 20 MB and 50 pages.
+The notebook covers annotation auditing, coordinate conversion, EDA, leakage
+checks, YOLOv8 configuration, model evaluation, privacy coverage, threshold
+sensitivity, failure analysis, and CPU benchmarking.
 
-## Project Files
+The complete rendered report is available here:
+[license_plate_detection_case_study.pdf](license_plate_detection_case_study.pdf).
 
-- `Original_files/`: preserved original image and label zip archives.
-- `images/` and `labels/`: extracted YOLO dataset folders.
-- `data.yaml`: YOLOv8 dataset configuration.
-- `step_01_annotation_audit.py`: helper script for label audit, coordinate conversion, box overlays, and blur samples.
-- `build_case_study_notebook.py`: recreates the notebook in the same step-by-step case-study style as previous projects.
-- `license_plate_detection_case_study.ipynb`: main notebook for analysis and final PDF export.
+## What I Learned
 
-## Step 01: Annotation Quality Check
+- Annotation quality directly affects both detection and privacy protection.
+- Evaluation should use an untouched test set rather than validation metrics alone.
+- Deployment benchmarking is as important as training accuracy.
+- Privacy applications need domain-specific metrics beyond mAP and IoU.
+- Failure cases and image-level pass rates reveal risks hidden by aggregate metrics.
+- Moderate over-blurring is safer than leaving readable plate characters exposed.
 
-YOLO labels store boxes in normalized format:
+## Limitations and Responsible Use
 
-```text
-class_id center_x center_y width height
-```
+The model provides an automated privacy layer, not a strict privacy guarantee.
+It should be monitored for missed, small, angled, low-light, and motion-blurred
+plates. Production use should prioritize recall, validate performance on the
+target camera domain, and include a review path for high-risk imagery.
 
-OpenCV needs pixel corner coordinates:
+## Suggested GitHub Topics
 
-```python
-x1 = (center_x - width / 2) * image_width
-y1 = (center_y - height / 2) * image_height
-x2 = (center_x + width / 2) * image_width
-y2 = (center_y + height / 2) * image_height
-```
-
-Drawing these boxes on raw images is critical before training because it catches shifted boxes, wrong sizes, missing labels, duplicate images, or labels that point outside the image. If the model learns from poor boxes, the final blur will also be poor because the blur region comes directly from the predicted bounding box.
-
-Run the audit:
-
-```powershell
-cd C:\python\ML-POC\License_Plate_Detection
-$env:YOLO_CONFIG_DIR='C:\python\ML-POC\License_Plate_Detection'
-..\.venv\Scripts\python.exe step_01_annotation_audit.py
-```
-
-Outputs are saved to:
-
-```text
-outputs/step_01_annotation_check/
-```
-
-## Next Notebook Steps
-
-The notebook now also includes:
-
-- YOLOv8 `data.yaml` validation.
-- A controlled training cell for `YOLOv8s` with `imgsz=960`.
-- Evaluation metrics for precision, recall, mAP50, mAP50-95, and visual blur quality.
-
-Full model training is intentionally disabled in the notebook by default:
-
-```python
-RUN_FULL_TRAINING = False
-```
-
-When you are ready to train the model, change it to `True` inside the notebook and run that cell.
+`computer-vision` `yolov8` `deep-learning` `machine-learning` `opencv` `python`
+`privacy` `object-detection`

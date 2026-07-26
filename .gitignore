@@ -11,6 +11,7 @@
 /runs/
 /outputs/
 /Ultralytics/
+/weights/
 *.pt
 *.onnx
 *.engine
@@ -24,6 +25,8 @@ __pycache__/
 .venv/
 venv/
 env/
+/.ultralytics/
+/demo_outputs/
 
 # Editor and operating-system files
 .vscode/
