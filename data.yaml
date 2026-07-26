@@ -1,0 +1,7 @@
+path: .
+train: splits/train_labeled.txt
+val: splits/val.txt
+test: splits/test.txt
+
+names:
+  0: license_plate

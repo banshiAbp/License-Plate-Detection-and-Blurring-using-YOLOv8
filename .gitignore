@@ -1,0 +1,32 @@
+# Local datasets and source archives
+/Original_files/
+/images/
+/labels/
+*.zip
+*.7z
+*.tar
+*.tar.gz
+
+# Training and generated artifacts
+/runs/
+/outputs/
+/Ultralytics/
+*.pt
+*.onnx
+*.engine
+
+# Python and notebook caches
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Local environments
+.venv/
+venv/
+env/
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
