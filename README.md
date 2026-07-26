@@ -252,3 +252,7 @@ are not distributed in this repository.
 
 `computer-vision` `yolov8` `deep-learning` `machine-learning` `opencv` `python`
 `privacy` `object-detection`
+
+**Data ethics note:** The visual assets shown in this README are synthetic
+illustrative examples or anonymized outputs used for educational purposes. No
+personally identifiable vehicle information is included.
